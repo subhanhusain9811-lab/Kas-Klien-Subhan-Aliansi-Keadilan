@@ -1479,6 +1479,9 @@ function openLightbox(txId) {
   document.getElementById('lbTxAmount').textContent = formatRupiah(tx.amount);
   document.getElementById('lbTxAmount').className = tx.type === 'UANG MASUK' ? 'text-green' : 'text-red';
   document.getElementById('lbTxCategory').textContent = tx.category;
+  if (tx.receipt && tx.receipt.receiptType) {
+    document.getElementById('lbReceiptTitle').textContent = `Bukti: ${tx.receipt.receiptType} (${tx.receipt.fileName})`;
+  }
   document.getElementById('lbTxNotes').textContent = tx.notes || '-';
   document.getElementById('lbFileName').textContent = tx.receipt.fileName || '-';
 
@@ -1606,9 +1609,10 @@ function openTransactionModal(tx = null, prefilledType = null, prefilledClientId
   const form = document.getElementById('txForm');
   form.reset();
   pendingReceipt = null;
-  document.getElementById('selectedReceiptFileName').textContent = 'Belum ada file dipilih';
-  document.getElementById('btnRemoveReceipt').style.display = 'none';
-  document.getElementById('receiptPreviewThumbContainer').style.display = 'none';
+  const previewCard = document.getElementById('receiptPreviewCard');
+  if (previewCard) previewCard.style.display = 'none';
+  const receiptTypeSelect = document.getElementById('formTxReceiptType');
+  if (receiptTypeSelect) receiptTypeSelect.value = 'Resi Pengiriman / Bukti Transfer';
 
   // Populate Clients in dropdown
   const clientSelect = document.getElementById('formTxClientSelect');
@@ -1636,11 +1640,26 @@ function openTransactionModal(tx = null, prefilledType = null, prefilledClientId
 
     if (tx.receipt && tx.receipt.dataUrl) {
       pendingReceipt = { ...tx.receipt };
-      document.getElementById('selectedReceiptFileName').textContent = tx.receipt.fileName;
-      document.getElementById('btnRemoveReceipt').style.display = 'inline';
-      if (!tx.receipt.fileName.endsWith('.pdf')) {
-        document.getElementById('receiptPreviewThumbContainer').style.display = 'block';
-        document.getElementById('receiptThumbImg').src = tx.receipt.dataUrl;
+      const previewCard = document.getElementById('receiptPreviewCard');
+      if (previewCard) {
+        previewCard.style.display = 'flex';
+        document.getElementById('selectedReceiptFileName').textContent = tx.receipt.fileName;
+        document.getElementById('receiptTypeBadge').textContent = tx.receipt.receiptType || 'Bukti Transaksi';
+        document.getElementById('receiptSizeBadge').textContent = tx.receipt.sizeStr || 'Tersimpan';
+        const isPdf = (tx.receipt.fileType === 'application/pdf') || (tx.receipt.fileName && tx.receipt.fileName.endsWith('.pdf'));
+        const thumb = document.getElementById('receiptThumbImg');
+        const pdfIcon = document.getElementById('receiptPdfIcon');
+        if (isPdf) {
+          thumb.style.display = 'none';
+          pdfIcon.style.display = 'block';
+        } else {
+          thumb.style.display = 'block';
+          thumb.src = tx.receipt.dataUrl;
+          pdfIcon.style.display = 'none';
+        }
+      }
+      if (document.getElementById('formTxReceiptType')) {
+        document.getElementById('formTxReceiptType').value = tx.receipt.receiptType || 'Resi Pengiriman / Bukti Transfer';
       }
     }
   } else {
@@ -1695,52 +1714,124 @@ document.querySelectorAll('input[name="txTypeRadio"]').forEach(radio => {
   });
 });
 
-// File upload handler
-document.getElementById('btnSelectReceipt').addEventListener('click', () => {
-  document.getElementById('formTxReceiptFile').click();
-});
-
-document.getElementById('formTxReceiptFile').addEventListener('change', async (e) => {
-  const file = e.target.files[0];
+// Helper untuk memproses berkas resi/foto kamera
+async function processSelectedReceiptFile(file) {
   if (!file) return;
 
   try {
-    showToast('Mengompres dan memproses berkas resi...', 'info');
+    showToast('Memproses dan mengompres dokumen bukti...', 'info');
     const { dataUrl, fileType } = await compressImage(file);
     const dateVal = document.getElementById('formTxDate').value || new Date().toISOString().split('T')[0];
     const txIdVal = document.getElementById('formTxId').value || generateTransactionId();
-    const ext = file.name.split('.').pop();
+    const ext = file.name ? file.name.split('.').pop() : (fileType === 'application/pdf' ? 'pdf' : 'jpg');
     const safeName = `${dateVal}_${txIdVal}_bukti.${ext}`;
+    const receiptType = document.getElementById('formTxReceiptType').value || 'Bukti Transaksi';
+
+    const sizeInKb = Math.round((dataUrl.length * 3 / 4) / 1024);
 
     pendingReceipt = {
       fileName: safeName,
       fileType: fileType,
       dataUrl: dataUrl,
+      receiptType: receiptType,
+      sizeStr: `${sizeInKb} KB`,
       path: `/data/clients/klien-xxxx/receipts/${safeName}`
     };
 
+    const previewCard = document.getElementById('receiptPreviewCard');
+    if (previewCard) previewCard.style.display = 'flex';
     document.getElementById('selectedReceiptFileName').textContent = safeName;
-    document.getElementById('btnRemoveReceipt').style.display = 'inline';
+    document.getElementById('receiptTypeBadge').textContent = receiptType;
+    document.getElementById('receiptSizeBadge').textContent = `${sizeInKb} KB (Terkoreksi)`;
 
-    if (fileType !== 'application/pdf') {
-      document.getElementById('receiptPreviewThumbContainer').style.display = 'block';
-      document.getElementById('receiptThumbImg').src = dataUrl;
+    const isPdf = fileType === 'application/pdf';
+    const thumb = document.getElementById('receiptThumbImg');
+    const pdfIcon = document.getElementById('receiptPdfIcon');
+    if (isPdf) {
+      thumb.style.display = 'none';
+      pdfIcon.style.display = 'block';
     } else {
-      document.getElementById('receiptPreviewThumbContainer').style.display = 'none';
+      thumb.style.display = 'block';
+      thumb.src = dataUrl;
+      pdfIcon.style.display = 'none';
     }
 
-    showToast('Bukti transaksi berhasil disiapkan.');
+    showToast('✓ Bukti transaksi berhasil disiapkan dan dikompres.');
   } catch (err) {
     console.error(err);
     showToast('Gagal memproses gambar/resi.', 'error');
   }
+}
+
+// 1. Ambil Foto Kamera Smartphone
+const btnCapture = document.getElementById('btnCapturePhoto');
+if (btnCapture) {
+  btnCapture.addEventListener('click', () => {
+    document.getElementById('formTxCameraInput').click();
+  });
+}
+const camInput = document.getElementById('formTxCameraInput');
+if (camInput) {
+  camInput.addEventListener('change', (e) => {
+    if (e.target.files && e.target.files[0]) {
+      processSelectedReceiptFile(e.target.files[0]);
+    }
+  });
+}
+
+// 2. Pilih dari Galeri / Berkas PDF
+document.getElementById('btnSelectReceipt').addEventListener('click', () => {
+  document.getElementById('formTxReceiptFile').click();
 });
+document.getElementById('formTxReceiptFile').addEventListener('change', (e) => {
+  if (e.target.files && e.target.files[0]) {
+    processSelectedReceiptFile(e.target.files[0]);
+  }
+});
+
+// 3. Lihat Preview Cepat Bukti yang Sedang Aktif
+const btnPrevCur = document.getElementById('btnPreviewCurrentReceipt');
+if (btnPrevCur) {
+  btnPrevCur.addEventListener('click', () => {
+    if (pendingReceipt && pendingReceipt.dataUrl) {
+      const isPdf = pendingReceipt.fileType === 'application/pdf';
+      const imgEl = document.getElementById('lbImage');
+      const pdfViewer = document.getElementById('lbPdfViewer');
+      const pdfFrame = document.getElementById('lbPdfFrame');
+
+      document.getElementById('lbReceiptTitle').textContent = `Preview: ${pendingReceipt.fileName}`;
+      document.getElementById('lbTxCode').textContent = document.getElementById('formTxId').value || 'Draft Baru';
+      const clientSelect = document.getElementById('formTxClientSelect');
+      document.getElementById('lbClientName').textContent = clientSelect.options[clientSelect.selectedIndex]?.text || '-';
+      document.getElementById('lbTxDate').textContent = document.getElementById('formTxDate').value || '-';
+      document.getElementById('lbTxAmount').textContent = formatRupiah(document.getElementById('formTxAmountRaw').value || 0);
+      document.getElementById('lbTxCategory').textContent = document.getElementById('formTxCategory').value || '-';
+      document.getElementById('lbTxNotes').textContent = document.getElementById('formTxNotes').value || '-';
+      document.getElementById('lbFileName').textContent = pendingReceipt.fileName;
+
+      if (isPdf) {
+        imgEl.style.display = 'none';
+        pdfViewer.style.display = 'block';
+        pdfFrame.src = pendingReceipt.dataUrl;
+      } else {
+        pdfViewer.style.display = 'none';
+        imgEl.style.display = 'block';
+        imgEl.src = pendingReceipt.dataUrl;
+        state.lightboxScale = 1;
+        state.lightboxRotate = 0;
+        applyLightboxTransform();
+      }
+      document.getElementById('modalLightbox').style.display = 'flex';
+    }
+  });
+}
 
 document.getElementById('btnRemoveReceipt').addEventListener('click', () => {
   pendingReceipt = null;
-  document.getElementById('selectedReceiptFileName').textContent = 'Belum ada file dipilih';
-  document.getElementById('btnRemoveReceipt').style.display = 'none';
-  document.getElementById('receiptPreviewThumbContainer').style.display = 'none';
+  const previewCard = document.getElementById('receiptPreviewCard');
+  if (previewCard) previewCard.style.display = 'none';
+  const receiptTypeSelect = document.getElementById('formTxReceiptType');
+  if (receiptTypeSelect) receiptTypeSelect.value = 'Resi Pengiriman / Bukti Transfer';
   document.getElementById('formTxReceiptFile').value = '';
 });
 
@@ -2125,6 +2216,10 @@ function navigateTo(viewId) {
   const navItem = document.querySelector(`.nav-item[data-view="${viewId}"]`);
   if (navItem) navItem.classList.add('active');
 
+  document.querySelectorAll('.bnav-item').forEach(b => b.classList.remove('active'));
+  const bnavItem = document.querySelector(`.bnav-item[data-view="${viewId}"]`);
+  if (bnavItem) bnavItem.classList.add('active');
+
   // Breadcrumb updates
   const viewTitles = {
     'dashboard': 'Dashboard Ringkasan',
@@ -2217,6 +2312,24 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.classList.add('dark-theme');
     document.getElementById('themeIcon').textContent = '☀️';
   }
+
+  // Mobile FAB Tambah Transaksi
+  const mobileFab = document.getElementById('mobileFabAddTx');
+  if (mobileFab) {
+    mobileFab.addEventListener('click', () => {
+      openTransactionModal();
+    });
+  }
+
+  // Mobile Bottom Navigation Links
+  document.querySelectorAll('.bnav-item').forEach(bitem => {
+    bitem.addEventListener('click', (e) => {
+      e.preventDefault();
+      const v = bitem.getAttribute('data-view');
+      window.location.hash = v;
+      navigateTo(v);
+    });
+  });
 
   // Mobile Menu Toggle
   document.getElementById('btnMenuToggle').addEventListener('click', () => {
