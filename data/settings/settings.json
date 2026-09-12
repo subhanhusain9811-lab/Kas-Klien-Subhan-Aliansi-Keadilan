@@ -1,0 +1,13 @@
+{
+  "firmName": "ALIANSI KEADILAN LAW OFFICES",
+  "ownerName": "Ahmad Subhan Suaib, S.H.",
+  "currency": "IDR (Rp)",
+  "activeYear": "2026",
+  "theme": "light",
+  "github": {
+    "repo": "subhanhusain9811-lab/Kas-Klien-Subhan-Aliansi-Keadilan",
+    "branch": "main",
+    "dataFolder": "data",
+    "token": ""
+  }
+}
