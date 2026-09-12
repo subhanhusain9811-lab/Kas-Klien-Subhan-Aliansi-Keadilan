@@ -1,42 +1,18 @@
 [
   {
-    "id": "LOG-1789224845336",
-    "timestamp": "12/09/2026 22.54.05",
-    "action": "SYNC",
-    "entity": "GITHUB",
-    "details": "Berhasil unggah 1 folder klien dan 2 transaksi ke GitHub",
-    "syncStatus": "pending"
+    "id": "LOG-1789235349620",
+    "timestamp": "13/09/2026 01.49.09",
+    "action": "RESTORE",
+    "entity": "BACKUP",
+    "details": "Memulihkan 1 klien dan 31 transaksi dari file cadangan",
+    "syncStatus": "local"
   },
   {
-    "id": "LOG-1789222539820",
-    "timestamp": "12/09/2026 22.15.39",
+    "id": "LOG-BM-FINAL",
+    "timestamp": "13/09/2026 01:45:00",
     "action": "CREATE",
-    "entity": "TRANSACTION",
-    "details": "Catat transaksi baru TRX-000002 (BASRI MARONENG) UANG KELUAR Rp Rp 30.000.000",
-    "syncStatus": "pending"
-  },
-  {
-    "id": "LOG-1789222450874",
-    "timestamp": "12/09/2026 22.14.10",
-    "action": "CREATE",
-    "entity": "TRANSACTION",
-    "details": "Catat transaksi baru TRX-000001 (BASRI MARONENG) UANG MASUK Rp Rp 50.000.000",
-    "syncStatus": "pending"
-  },
-  {
-    "id": "LOG-1789222315071",
-    "timestamp": "12/09/2026 22.11.55",
-    "action": "CREATE",
-    "entity": "CLIENT",
-    "details": "Menambahkan klien baru BASRI MARONENG (KLIEN-0001)",
-    "syncStatus": "pending"
-  },
-  {
-    "id": "LOG-1789222222512",
-    "timestamp": "12/09/2026 22.10.22",
-    "action": "PURGE",
-    "entity": "SYSTEM",
-    "details": "Semua data demo telah dibersihkan oleh pengguna",
-    "syncStatus": "pending"
+    "entity": "CLIENT_TRANSACTIONS",
+    "details": "Finalisasi pembukuan BASRI MARONENG (KLIEN-0001) 31 transaksi lengkap. Total Masuk: Rp 65,000,000, Total Keluar: Rp 64,976,000, Saldo Kas Bersih Akhir: Rp 24,000",
+    "syncStatus": "local"
   }
 ]
