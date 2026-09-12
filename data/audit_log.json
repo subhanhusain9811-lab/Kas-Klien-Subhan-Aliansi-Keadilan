@@ -1,5 +1,13 @@
 [
   {
+    "id": "LOG-1789224845336",
+    "timestamp": "12/09/2026 22.54.05",
+    "action": "SYNC",
+    "entity": "GITHUB",
+    "details": "Berhasil unggah 1 folder klien dan 2 transaksi ke GitHub",
+    "syncStatus": "pending"
+  },
+  {
     "id": "LOG-1789222539820",
     "timestamp": "12/09/2026 22.15.39",
     "action": "CREATE",
