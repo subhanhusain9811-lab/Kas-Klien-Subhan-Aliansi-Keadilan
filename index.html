@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KasKlien — Pencatatan Keuangan Berbasis Klien</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-container">
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-wrapper">
+          <div class="logo-icon">💼</div>
+          <div class="logo-text">
+            <h2>KasKlien</h2>
+            <span class="badge badge-navy">Pro Edition</span>
+          </div>
+        </div>
+        <button class="btn-icon btn-close-sidebar" id="btnCloseSidebar" aria-label="Tutup Menu">&times;</button>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-title">UTAMA</div>
+        <a href="#dashboard" class="nav-item active" data-view="dashboard">
+          <span class="nav-icon">📊</span>
+          <span class="nav-label">Dashboard</span>
+        </a>
+        <a href="#clients" class="nav-item" data-view="clients">
+          <span class="nav-icon">👥</span>
+          <span class="nav-label">Data Klien</span>
+        </a>
+        <a href="#transactions" class="nav-item" data-view="transactions">
+          <span class="nav-icon">📝</span>
+          <span class="nav-label">Semua Transaksi</span>
+        </a>
+
+        <div class="nav-section-title">ARUS KAS</div>
+        <a href="#inflow" class="nav-item" data-view="inflow">
+          <span class="nav-icon">💰</span>
+          <span class="nav-label">Uang Masuk</span>
+          <span class="badge badge-green" id="badgeInflowCount">0</span>
+        </a>
+        <a href="#outflow" class="nav-item" data-view="outflow">
+          <span class="nav-icon">💸</span>
+          <span class="nav-label">Uang Keluar</span>
+          <span class="badge badge-red" id="badgeOutflowCount">0</span>
+        </a>
+
+        <div class="nav-section-title">ANALISIS & REKAP</div>
+        <a href="#reports" class="nav-item" data-view="reports">
+          <span class="nav-icon">📈</span>
+          <span class="nav-label">Laporan Keuangan</span>
+        </a>
+        <a href="#client-recap" class="nav-item" data-view="client-recap">
+          <span class="nav-icon">📑</span>
+          <span class="nav-label">Rekap Semua Klien</span>
+        </a>
+        <a href="#audit-log" class="nav-item" data-view="audit-log">
+          <span class="nav-icon">🕒</span>
+          <span class="nav-label">Riwayat Perubahan</span>
+        </a>
+
+        <div class="nav-section-title">SISTEM & CADANGAN</div>
+        <a href="#backup" class="nav-item" data-view="backup">
+          <span class="nav-icon">💾</span>
+          <span class="nav-label">Backup & Restore</span>
+        </a>
+        <a href="#settings" class="nav-item" data-view="settings">
+          <span class="nav-icon">⚙️</span>
+          <span class="nav-label">Pengaturan & GitHub</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="sync-status-card" id="sidebarSyncCard">
+          <div class="sync-indicator">
+            <span class="status-dot green" id="syncDot"></span>
+            <span class="sync-label" id="syncStatusText">Tersinkron Lokal</span>
+          </div>
+          <button class="btn btn-xs btn-outline" id="btnQuickSync">Sinkronkan</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-wrapper">
+      <!-- TOP NAVBAR -->
+      <header class="top-navbar">
+        <div class="navbar-left">
+          <button class="btn-icon btn-menu-toggle" id="btnMenuToggle" aria-label="Buka Menu">
+            <span>☰</span>
+          </button>
+          <div class="breadcrumb" id="topBreadcrumb">
+            <span class="breadcrumb-root">KasKlien</span>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-active" id="currentViewTitle">Dashboard</span>
+          </div>
+        </div>
+
+        <div class="navbar-search">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="globalSearchInput" placeholder="Cari klien, ID transaksi, keterangan, nominal...">
+          <button class="btn-clear-search" id="btnClearSearch" style="display:none;">&times;</button>
+        </div>
+
+        <div class="navbar-right">
+          <div class="sync-pill" id="navSyncPill" title="Status Sinkronisasi GitHub">
+            <span class="status-dot" id="navSyncDot"></span>
+            <span class="sync-pill-text" id="navSyncText">Lokal Aktif</span>
+          </div>
+          <button class="btn-icon" id="btnThemeToggle" title="Ganti Tema Gelap/Terang">
+            <span id="themeIcon">🌙</span>
+          </button>
+          <div class="user-profile-badge">
+            <div class="avatar" id="navUserAvatar">AS</div>
+            <div class="user-info d-none-mobile">
+              <span class="user-name" id="navUserName">Ahmad Subhan</span>
+              <span class="user-firm" id="navUserFirm">Minzathu Law</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- GLOBAL SEARCH RESULTS OVERLAY -->
+      <div class="search-overlay" id="searchOverlay" style="display:none;">
+        <div class="search-results-card">
+          <div class="search-results-header">
+            <h4>Hasil Pencarian Global</h4>
+            <span id="searchResultsCount">0 ditemukan</span>
+          </div>
+          <div class="search-results-body" id="searchResultsContainer"></div>
+        </div>
+      </div>
+
+      <!-- MAIN VIEW AREA -->
+      <main class="content-area" id="mainContent">
+
+        <!-- ==================== VIEW: DASHBOARD ==================== -->
+        <section class="view-section active" id="view-dashboard">
+          <div class="page-header">
+            <div>
+              <h1 class="page-title">Ringkasan Keuangan</h1>
+              <p class="page-subtitle">Pantau seluruh arus kas masuk, kas keluar, dan saldo berdasarkan klien secara real-time.</p>
+            </div>
+            <div class="page-actions">
+              <button class="btn btn-outline" id="btnFilterPeriodDash">
+                📅 <span id="dashPeriodLabel">Semua Periode</span>
+              </button>
+              <button class="btn btn-primary" id="btnOpenNewTxDash">
+                ➕ Tambah Transaksi
+              </button>
+            </div>
+          </div>
+
+          <!-- QUICK ACTION BAR -->
+          <div class="quick-action-container">
+            <button class="quick-action-card purple" id="qaAddClient">
+              <div class="qa-icon">👥</div>
+              <div class="qa-text">
+                <strong>Tambah Klien</strong>
+                <span>Registrasi klien baru</span>
+              </div>
+            </button>
+            <button class="quick-action-card green" id="qaCashIn">
+              <div class="qa-icon">💰</div>
+              <div class="qa-text">
+                <strong>Uang Masuk</strong>
+                <span>Catat pemasukan klien</span>
+              </div>
+            </button>
+            <button class="quick-action-card red" id="qaCashOut">
+              <div class="qa-icon">💸</div>
+              <div class="qa-text">
+                <strong>Uang Keluar</strong>
+                <span>Biaya / belanja / operasional</span>
+              </div>
+            </button>
+            <button class="quick-action-card gold" id="qaReports">
+              <div class="qa-icon">📊</div>
+              <div class="qa-text">
+                <strong>Lihat Laporan</strong>
+                <span>Analisis grafik & audit</span>
+              </div>
+            </button>
+            <button class="quick-action-card navy" id="qaClientList">
+              <div class="qa-icon">📁</div>
+              <div class="qa-text">
+                <strong>Data Klien</strong>
+                <span>Daftar & saldo per klien</span>
+              </div>
+            </button>
+          </div>
+
+          <!-- STATS CARDS -->
+          <div class="stats-grid">
+            <!-- Card Uang Masuk (Green) -->
+            <div class="stat-card card-green">
+              <div class="stat-header">
+                <span class="stat-title">Total Uang Masuk</span>
+                <span class="stat-badge-icon">↗</span>
+              </div>
+              <div class="stat-value" id="dashTotalInflow">Rp 0</div>
+              <div class="stat-footer">
+                <span class="text-muted" id="dashInflowCount">0 transaksi masuk</span>
+              </div>
+            </div>
+
+            <!-- Card Uang Keluar (Red) -->
+            <div class="stat-card card-red">
+              <div class="stat-header">
+                <span class="stat-title">Total Uang Keluar</span>
+                <span class="stat-badge-icon">↘</span>
+              </div>
+              <div class="stat-value" id="dashTotalOutflow">Rp 0</div>
+              <div class="stat-footer">
+                <span class="text-muted" id="dashOutflowCount">0 transaksi keluar</span>
+              </div>
+            </div>
+
+            <!-- Card Saldo (Navy) -->
+            <div class="stat-card card-navy">
+              <div class="stat-header">
+                <span class="stat-title">Saldo Bersih</span>
+                <span class="stat-badge-icon">⚖️</span>
+              </div>
+              <div class="stat-value" id="dashNetBalance">Rp 0</div>
+              <div class="stat-footer">
+                <span class="text-muted" id="dashBalanceStatus">Kas seimbang</span>
+              </div>
+            </div>
+
+            <!-- Card Klien (Purple) -->
+            <div class="stat-card card-purple">
+              <div class="stat-header">
+                <span class="stat-title">Jumlah Klien</span>
+                <span class="stat-badge-icon">👥</span>
+              </div>
+              <div class="stat-value" id="dashClientCount">0 Klien</div>
+              <div class="stat-footer">
+                <span class="text-muted" id="dashActiveClientInfo">Semua data terpisah</span>
+              </div>
+            </div>
+
+            <!-- Card Transaksi Bulan Ini (Gold) -->
+            <div class="stat-card card-gold">
+              <div class="stat-header">
+                <span class="stat-title">Transaksi Bulan Ini</span>
+                <span class="stat-badge-icon">📅</span>
+              </div>
+              <div class="stat-value" id="dashMonthTxCount">0 Transaksi</div>
+              <div class="stat-footer">
+                <span class="text-muted" id="dashMonthTxNominal">Total: Rp 0</span>
+              </div>
+            </div>
+
+            <!-- Card Bukti / Resi (Silver) -->
+            <div class="stat-card card-silver">
+              <div class="stat-header">
+                <span class="stat-title">Bukti / Resi Terverifikasi</span>
+                <span class="stat-badge-icon">📎</span>
+              </div>
+              <div class="stat-value" id="dashReceiptCount">0 File</div>
+              <div class="stat-footer">
+                <span class="text-muted">Tersimpan di folder klien</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- CHARTS SECTION -->
+          <div class="dashboard-grid-2">
+            <div class="content-card">
+              <div class="card-header">
+                <div>
+                  <h3 class="card-title">Arus Kas Bulanan (Tahun Ini)</h3>
+                  <p class="card-subtitle">Perbandingan uang masuk dan uang keluar per bulan</p>
+                </div>
+                <div class="legend-group">
+                  <span class="legend-item"><span class="legend-color bg-green"></span> Masuk</span>
+                  <span class="legend-item"><span class="legend-color bg-red"></span> Keluar</span>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="chart-container" id="cashflowChartContainer">
+                  <canvas id="cashflowChart" height="240"></canvas>
+                </div>
+              </div>
+            </div>
+
+            <div class="content-card">
+              <div class="card-header">
+                <div>
+                  <h3 class="card-title">Pengeluaran Berdasarkan Kategori</h3>
+                  <p class="card-subtitle">Distribusi pos biaya operasional & belanja</p>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="chart-container" id="categoryChartContainer">
+                  <canvas id="categoryChart" height="240"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- RECENT TRANSACTIONS TABLE -->
+          <div class="content-card mt-4">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Transaksi Terbaru</h3>
+                <p class="card-subtitle">Daftar transaksi mutasi terakhir yang dicatat</p>
+              </div>
+              <a href="#transactions" class="btn btn-sm btn-outline" data-view="transactions">Lihat Semua</a>
+            </div>
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>ID & Tanggal</th>
+                      <th>Klien</th>
+                      <th>Jenis & Kategori</th>
+                      <th>Keterangan</th>
+                      <th class="text-right">Nominal</th>
+                      <th>Bukti</th>
+                      <th class="text-center">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody id="dashRecentTxBody">
+                    <!-- Populated via JS -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== VIEW: DATA KLIEN ==================== -->
+        <section class="view-section" id="view-clients">
+          <div class="page-header">
+            <div>
+              <h1 class="page-title">Manajemen Data Klien</h1>
+              <p class="page-subtitle">Setiap klien memiliki buku kas dan folder data terpisah agar pencatatan tidak bercampur.</p>
+            </div>
+            <div class="page-actions">
+              <button class="btn btn-primary" id="btnOpenNewClient">
+                ➕ Tambah Klien Baru
+              </button>
+            </div>
+          </div>
+
+          <!-- SEARCH & FILTER BAR KLIEN -->
+          <div class="filter-bar">
+            <div class="filter-group flex-1">
+              <input type="text" id="clientFilterSearch" placeholder="Cari nama klien, nomor referensi, alamat, atau kontak...">
+            </div>
+            <div class="filter-group">
+              <select id="clientFilterStatus">
+                <option value="all">Semua Status</option>
+                <option value="Aktif">Aktif</option>
+                <option value="Selesai">Selesai / Nonaktif</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <select id="clientSortBy">
+                <option value="name_asc">Nama (A-Z)</option>
+                <option value="name_desc">Nama (Z-A)</option>
+                <option value="balance_desc">Saldo Tertinggi</option>
+                <option value="tx_desc">Transaksi Terbanyak</option>
+                <option value="recent">Terbaru Ditambahkan</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- CLIENTS GRID / CARDS -->
+          <div class="client-cards-grid" id="clientsGridContainer">
+            <!-- Populated via JS -->
+          </div>
+        </section>
+
+        <!-- ==================== VIEW: DETAIL KLIEN KHUSUS ==================== -->
+        <section class="view-section" id="view-client-detail">
+          <div class="page-header">
+            <div class="client-detail-header-left">
+              <button class="btn btn-sm btn-outline mr-2" id="btnBackToClients">← Kembali ke Daftar</button>
+              <div>
+                <div class="d-flex align-center gap-2">
+                  <h1 class="page-title" id="clientDetailName">Nama Klien</h1>
+                  <span class="badge badge-purple" id="clientDetailId">KLIEN-0001</span>
+                  <span class="badge badge-green" id="clientDetailStatus">Aktif</span>
+                </div>
+                <p class="page-subtitle" id="clientDetailMeta">Nomor Ref: - | Ditambahkan: -</p>
+              </div>
+            </div>
+            <div class="page-actions">
+              <button class="btn btn-outline" id="btnEditCurrentClient">✏️ Edit Klien</button>
+              <button class="btn btn-green" id="btnAddTxForClientIn">💰 Kas Masuk</button>
+              <button class="btn btn-red" id="btnAddTxForClientOut">💸 Kas Keluar</button>
+            </div>
+          </div>
+
+          <!-- CLIENT FINANCIAL SUMMARY METRICS -->
+          <div class="stats-grid-3">
+            <div class="stat-card card-green">
+              <div class="stat-header">
+                <span class="stat-title">Total Uang Masuk Klien</span>
+                <span>💰</span>
+              </div>
+              <div class="stat-value" id="clientDetailTotalIn">Rp 0</div>
+              <div class="stat-footer">
+                <span class="text-muted" id="clientDetailCountIn">0 kali penerimaan</span>
+              </div>
+            </div>
+
+            <div class="stat-card card-red">
+              <div class="stat-header">
+                <span class="stat-title">Total Uang Keluar Klien</span>
+                <span>💸</span>
+              </div>
+              <div class="stat-value" id="clientDetailTotalOut">Rp 0</div>
+              <div class="stat-footer">
+                <span class="text-muted" id="clientDetailCountOut">0 kali pengeluaran</span>
+              </div>
+            </div>
+
+            <div class="stat-card card-navy">
+              <div class="stat-header">
+                <span class="stat-title">Saldo Kas Klien Ini</span>
+                <span>⚖️</span>
+              </div>
+              <div class="stat-value" id="clientDetailBalance">Rp 0</div>
+              <div class="stat-footer">
+                <span class="text-muted" id="clientDetailFolderNote">Folder: /data/clients/klien-xxxx/</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- CLIENT PROFILE DATA CARD -->
+          <div class="content-card mt-3">
+            <div class="card-header">
+              <h3 class="card-title">Informasi & Kontak Klien</h3>
+            </div>
+            <div class="card-body">
+              <div class="client-info-grid">
+                <div>
+                  <label class="text-muted d-block">Telepon / WhatsApp:</label>
+                  <strong id="clientDetailPhone">-</strong>
+                </div>
+                <div>
+                  <label class="text-muted d-block">Email:</label>
+                  <strong id="clientDetailEmail">-</strong>
+                </div>
+                <div>
+                  <label class="text-muted d-block">Alamat Domisili:</label>
+                  <strong id="clientDetailAddress">-</strong>
+                </div>
+                <div>
+                  <label class="text-muted d-block">Catatan / Keterangan Kasus:</label>
+                  <p id="clientDetailNotes" class="mt-1 text-secondary">-</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- CLIENT TRANSACTIONS TABLE -->
+          <div class="content-card mt-4">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Buku Kas Khusus Klien Ini</h3>
+                <p class="card-subtitle">Seluruh mutasi keuangan terisolasi dan hanya milik klien ini</p>
+              </div>
+              <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-outline" id="btnExportClientCSV">📥 Unduh CSV Klien</button>
+                <button class="btn btn-sm btn-outline" id="btnPrintClientReport">🖨️ Cetak Buku Kas</button>
+              </div>
+            </div>
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>ID & Tanggal</th>
+                      <th>Jenis</th>
+                      <th>Kategori</th>
+                      <th>Keterangan & Referensi</th>
+                      <th class="text-right">Nominal</th>
+                      <th>Metode</th>
+                      <th>Bukti</th>
+                      <th class="text-center">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody id="clientTxTableBody">
+                    <!-- Populated via JS -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== VIEW: TRANSAKSI (SEMUA / MASUK / KELUAR) ==================== -->
+        <section class="view-section" id="view-transactions">
+          <div class="page-header">
+            <div>
+              <h1 class="page-title" id="txPageTitle">Semua Riwayat Transaksi</h1>
+              <p class="page-subtitle">Pencatatan lengkap uang masuk dan uang keluar dengan filter multi-parameter.</p>
+            </div>
+            <div class="page-actions">
+              <button class="btn btn-outline" id="btnExportTxCSV">📥 Export CSV</button>
+              <button class="btn btn-primary" id="btnOpenNewTx">➕ Tambah Transaksi</button>
+            </div>
+          </div>
+
+          <!-- FILTER TRANSAKSI LENGKAP -->
+          <div class="content-card filter-container-card mb-3">
+            <div class="filter-header">
+              <strong>🔍 Filter Transaksi Lanjutan</strong>
+              <button class="btn-link" id="btnResetTxFilters">Reset Semua Filter</button>
+            </div>
+            <div class="filter-controls-grid">
+              <div class="filter-field">
+                <label>Pilih Klien</label>
+                <select id="filterTxClient">
+                  <option value="all">Semua Klien</option>
+                  <!-- Populated via JS -->
+                </select>
+              </div>
+
+              <div class="filter-field">
+                <label>Jenis Transaksi</label>
+                <select id="filterTxType">
+                  <option value="all">Semua Jenis</option>
+                  <option value="UANG MASUK">Uang Masuk (Pemasukan)</option>
+                  <option value="UANG KELUAR">Uang Keluar (Pengeluaran)</option>
+                </select>
+              </div>
+
+              <div class="filter-field">
+                <label>Kategori</label>
+                <select id="filterTxCategory">
+                  <option value="all">Semua Kategori</option>
+                  <!-- Populated via JS -->
+                </select>
+              </div>
+
+              <div class="filter-field">
+                <label>Tahun</label>
+                <select id="filterTxYear">
+                  <option value="all">Semua Tahun</option>
+                  <option value="2026" selected>2026</option>
+                  <option value="2025">2025</option>
+                  <option value="2024">2024</option>
+                </select>
+              </div>
+
+              <div class="filter-field">
+                <label>Bulan</label>
+                <select id="filterTxMonth">
+                  <option value="all">Semua Bulan</option>
+                  <option value="01">Januari</option>
+                  <option value="02">Februari</option>
+                  <option value="03">Maret</option>
+                  <option value="04">April</option>
+                  <option value="05">Mei</option>
+                  <option value="06">Juni</option>
+                  <option value="07">Juli</option>
+                  <option value="08">Agustus</option>
+                  <option value="09">September</option>
+                  <option value="10">Oktober</option>
+                  <option value="11">November</option>
+                  <option value="12">Desember</option>
+                </select>
+              </div>
+
+              <div class="filter-field">
+                <label>Tanggal Mulai</label>
+                <input type="date" id="filterTxStartDate">
+              </div>
+
+              <div class="filter-field">
+                <label>Tanggal Akhir</label>
+                <input type="date" id="filterTxEndDate">
+              </div>
+
+              <div class="filter-field">
+                <label>Metode Pembayaran</label>
+                <select id="filterTxMethod">
+                  <option value="all">Semua Metode</option>
+                  <option value="Transfer Bank">Transfer Bank</option>
+                  <option value="Cash">Tunai (Cash)</option>
+                  <option value="QRIS">QRIS</option>
+                  <option value="E-Wallet">E-Wallet</option>
+                  <option value="Lainnya">Lainnya</option>
+                </select>
+              </div>
+
+              <div class="filter-field">
+                <label>Nominal Min</label>
+                <input type="number" id="filterTxMinAmount" placeholder="Rp 0">
+              </div>
+
+              <div class="filter-field">
+                <label>Nominal Max</label>
+                <input type="number" id="filterTxMaxAmount" placeholder="Maksimal">
+              </div>
+            </div>
+          </div>
+
+          <!-- SUMMARY STRIP OF FILTERED TRANSACTIONS -->
+          <div class="summary-strip">
+            <div class="summary-strip-item">
+              <span class="label">Total Ditemukan:</span>
+              <strong id="filterSumCount">0 Transaksi</strong>
+            </div>
+            <div class="summary-strip-item">
+              <span class="label">Total Masuk:</span>
+              <strong class="text-green" id="filterSumInflow">Rp 0</strong>
+            </div>
+            <div class="summary-strip-item">
+              <span class="label">Total Keluar:</span>
+              <strong class="text-red" id="filterSumOutflow">Rp 0</strong>
+            </div>
+            <div class="summary-strip-item">
+              <span class="label">Selisih Bersih:</span>
+              <strong class="text-navy" id="filterSumBalance">Rp 0</strong>
+            </div>
+          </div>
+
+          <!-- TRANSACTIONS TABLE -->
+          <div class="content-card mt-3">
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>ID & Tanggal</th>
+                      <th>Klien</th>
+                      <th>Jenis</th>
+                      <th>Kategori</th>
+                      <th>Keterangan / Ref</th>
+                      <th class="text-right">Nominal</th>
+                      <th>Metode</th>
+                      <th>Bukti</th>
+                      <th class="text-center">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody id="allTxTableBody">
+                    <!-- Populated via JS -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== VIEW: LAPORAN KEUANGAN ==================== -->
+        <section class="view-section" id="view-reports">
+          <div class="page-header">
+            <div>
+              <h1 class="page-title">Laporan Keuangan Komprehensif</h1>
+              <p class="page-subtitle">Analisis neraca kas, komparasi bulanan, dan laporan siap cetak.</p>
+            </div>
+            <div class="page-actions">
+              <button class="btn btn-outline" id="btnExportReportExcel">📊 Export Excel</button>
+              <button class="btn btn-outline" id="btnExportReportCSV">📥 Export CSV</button>
+              <button class="btn btn-primary" id="btnPrintReport">🖨️ Cetak / Simpan PDF</button>
+            </div>
+          </div>
+
+          <!-- LAPORAN FILTER -->
+          <div class="filter-bar mb-3">
+            <div class="filter-group">
+              <label>Jenis Laporan:</label>
+              <select id="reportTypeSelect">
+                <option value="monthly">Laporan Bulanan</option>
+                <option value="yearly">Laporan Tahunan</option>
+                <option value="client">Laporan Per Klien</option>
+                <option value="custom">Periode Kustom</option>
+              </select>
+            </div>
+
+            <div class="filter-group" id="reportClientGroup">
+              <label>Pilih Klien:</label>
+              <select id="reportClientSelect">
+                <option value="all">Semua Klien (Konsolidasi)</option>
+                <!-- Populated via JS -->
+              </select>
+            </div>
+
+            <div class="filter-group" id="reportYearGroup">
+              <label>Tahun:</label>
+              <select id="reportYearSelect">
+                <option value="2026">2026</option>
+                <option value="2025">2025</option>
+                <option value="2024">2024</option>
+              </select>
+            </div>
+
+            <div class="filter-group" id="reportMonthGroup">
+              <label>Bulan:</label>
+              <select id="reportMonthSelect">
+                <option value="all">Semua Bulan (Setahun Penuh)</option>
+                <option value="01">Januari</option>
+                <option value="02">Februari</option>
+                <option value="03">Maret</option>
+                <option value="04">April</option>
+                <option value="05">Mei</option>
+                <option value="06">Juni</option>
+                <option value="07">Juli</option>
+                <option value="08">Agustus</option>
+                <option value="09" selected>September</option>
+                <option value="10">Oktober</option>
+                <option value="11">November</option>
+                <option value="12">Desember</option>
+              </select>
+            </div>
+
+            <button class="btn btn-secondary" id="btnGenerateReport">🔄 Tampilkan Laporan</button>
+          </div>
+
+          <!-- PRINTABLE REPORT SHEET -->
+          <div class="report-sheet" id="printableReportSheet">
+            <div class="report-letterhead">
+              <div class="letterhead-logo">💼</div>
+              <div class="letterhead-firm">
+                <h2 id="reportFirmName">MINZATHU & MINZATHU LAW OFFICES</h2>
+                <p id="reportFirmSub">Pencatatan Rekening Kas Operasional & Klien</p>
+                <small id="reportGeneratedDate">Dicetak pada: 12 September 2026, 20:57 WITA</small>
+              </div>
+            </div>
+            <hr class="divider">
+
+            <div class="report-meta-box">
+              <h3 id="reportTitleHeader">LAPORAN KAS SEPTEMBER 2026</h3>
+              <p id="reportSubHeader">Semua Klien Terkonsolidasi</p>
+            </div>
+
+            <div class="stats-grid-3 my-3">
+              <div class="stat-card card-green">
+                <div class="stat-title">Total Kas Masuk</div>
+                <div class="stat-value" id="repTotalIn">Rp 0</div>
+              </div>
+              <div class="stat-card card-red">
+                <div class="stat-title">Total Kas Keluar</div>
+                <div class="stat-value" id="repTotalOut">Rp 0</div>
+              </div>
+              <div class="stat-card card-navy">
+                <div class="stat-title">Saldo Kas Bersih</div>
+                <div class="stat-value" id="repNetBalance">Rp 0</div>
+              </div>
+            </div>
+
+            <!-- BREAKDOWN TABLE IN REPORT -->
+            <div class="mt-4">
+              <h4>Rincian Mutasi Transaksi</h4>
+              <div class="table-responsive mt-2">
+                <table class="data-table print-table">
+                  <thead>
+                    <tr>
+                      <th>No</th>
+                      <th>Tanggal</th>
+                      <th>No. Transaksi</th>
+                      <th>Klien</th>
+                      <th>Kategori</th>
+                      <th>Keterangan / Uraian</th>
+                      <th class="text-right">Uang Masuk</th>
+                      <th class="text-right">Uang Keluar</th>
+                    </tr>
+                  </thead>
+                  <tbody id="reportBodyTable">
+                    <!-- Populated via JS -->
+                  </tbody>
+                  <tfoot>
+                    <tr class="table-footer-row">
+                      <th colspan="6" class="text-right">TOTAL KESELURUHAN:</th>
+                      <th class="text-right text-green" id="repFootTotalIn">Rp 0</th>
+                      <th class="text-right text-red" id="repFootTotalOut">Rp 0</th>
+                    </tr>
+                    <tr class="table-footer-row bg-light">
+                      <th colspan="6" class="text-right">SALDO AKHIR:</th>
+                      <th colspan="2" class="text-right text-navy" id="repFootBalance">Rp 0</th>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+
+            <!-- SIGNATURE BOX FOR PRINT -->
+            <div class="report-signature-grid print-only mt-4">
+              <div class="sig-box">
+                <p>Mengetahui,</p>
+                <div class="sig-space"></div>
+                <strong>( Ahmad Subhan Suaib, S.H. )</strong>
+                <p>Managing Partner</p>
+              </div>
+              <div class="sig-box text-right">
+                <p>Mamuju, 12 September 2026</p>
+                <p>Dibuat oleh Administrasi Kas,</p>
+                <div class="sig-space"></div>
+                <strong>( Bagian Keuangan )</strong>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== VIEW: REKAP SEMUA KLIEN ==================== -->
+        <section class="view-section" id="view-client-recap">
+          <div class="page-header">
+            <div>
+              <h1 class="page-title">Rekapitulasi Kas Seluruh Klien</h1>
+              <p class="page-subtitle">Tabel perbandingan saldo, uang masuk, dan uang keluar per individu klien.</p>
+            </div>
+            <div class="page-actions">
+              <button class="btn btn-outline" id="btnExportRecapCSV">📥 Unduh Rekap CSV</button>
+              <button class="btn btn-primary" id="btnPrintRecap">🖨️ Cetak Rekap</button>
+            </div>
+          </div>
+
+          <div class="content-card">
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>ID Klien</th>
+                      <th>Nama Klien</th>
+                      <th>No. Referensi</th>
+                      <th>Status</th>
+                      <th class="text-right">Total Masuk</th>
+                      <th class="text-right">Total Keluar</th>
+                      <th class="text-right">Saldo Kas</th>
+                      <th class="text-center">Jml Transaksi</th>
+                      <th class="text-center">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody id="recapTableBody">
+                    <!-- Populated via JS -->
+                  </tbody>
+                  <tfoot>
+                    <tr class="table-footer-row">
+                      <th colspan="4" class="text-right">TOTAL KONSOLIDASI:</th>
+                      <th class="text-right text-green" id="recapGrandTotalIn">Rp 0</th>
+                      <th class="text-right text-red" id="recapGrandTotalOut">Rp 0</th>
+                      <th class="text-right text-navy" id="recapGrandBalance">Rp 0</th>
+                      <th class="text-center" id="recapGrandTxCount">0</th>
+                      <th></th>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== VIEW: AUDIT LOG ==================== -->
+        <section class="view-section" id="view-audit-log">
+          <div class="page-header">
+            <div>
+              <h1 class="page-title">Riwayat Perubahan Data (Audit Trail)</h1>
+              <p class="page-subtitle">Seluruh aktivitas penambahan, pengubahan, dan penghapusan data tercatat dengan detail waktu.</p>
+            </div>
+            <div class="page-actions">
+              <button class="btn btn-outline text-red" id="btnClearAuditLog">Hapus Riwayat</button>
+            </div>
+          </div>
+
+          <div class="content-card">
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Waktu & Tanggal</th>
+                      <th>Tipe Aksi</th>
+                      <th>Entitas</th>
+                      <th>Deskripsi Perubahan</th>
+                      <th>Status Sinkron</th>
+                    </tr>
+                  </thead>
+                  <tbody id="auditLogTableBody">
+                    <!-- Populated via JS -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== VIEW: BACKUP & RESTORE ==================== -->
+        <section class="view-section" id="view-backup">
+          <div class="page-header">
+            <div>
+              <h1 class="page-title">Cadangkan & Pulihkan Data (Backup & Restore)</h1>
+              <p class="page-subtitle">Penyimpanan aman lokal dan ekspor seluruh database klien, transaksi, dan bukti resi dalam format JSON.</p>
+            </div>
+          </div>
+
+          <div class="dashboard-grid-2">
+            <!-- BACKUP CARD -->
+            <div class="content-card">
+              <div class="card-header">
+                <h3 class="card-title">💾 Buat Cadangan (Backup Data)</h3>
+              </div>
+              <div class="card-body">
+                <p class="text-secondary mb-3">
+                  Unduh seluruh database aplikasi (Klien, Transaksi, Pengaturan, Log Audit) ke dalam sebuah file JSON terenkripsi/terstruktur.
+                  File ini dapat Anda simpan di komputer pribadi, Google Drive, atau flashdisk sebagai cadangan independen.
+                </p>
+                <div class="bg-light p-3 rounded mb-3">
+                  <div class="d-flex justify-between mb-1">
+                    <span>Jumlah Klien:</span>
+                    <strong id="backupStatClients">0 Klien</strong>
+                  </div>
+                  <div class="d-flex justify-between mb-1">
+                    <span>Jumlah Transaksi:</span>
+                    <strong id="backupStatTx">0 Transaksi</strong>
+                  </div>
+                  <div class="d-flex justify-between">
+                    <span>Bukti Resi Tersimpan:</span>
+                    <strong id="backupStatReceipts">0 Berkas</strong>
+                  </div>
+                </div>
+                <button class="btn btn-primary w-100" id="btnDownloadBackup">
+                  📥 Unduh File Backup (.json)
+                </button>
+              </div>
+            </div>
+
+            <!-- RESTORE CARD -->
+            <div class="content-card">
+              <div class="card-header">
+                <h3 class="card-title">🔄 Pulihkan Data (Restore)</h3>
+              </div>
+              <div class="card-body">
+                <p class="text-secondary mb-3">
+                  Unggah file backup JSON yang pernah Anda unduh sebelumnya untuk memulihkan seluruh data kas dan klien.
+                </p>
+                <div class="drop-zone" id="backupDropZone">
+                  <input type="file" id="restoreFileInput" accept=".json" style="display:none;">
+                  <div class="drop-zone-content" id="dropZoneContent">
+                    <span class="drop-zone-icon">📁</span>
+                    <p>Klik atau Seret file JSON backup ke sini</p>
+                    <small class="text-muted">Format: backup-keuangan-YYYY-MM-DD.json</small>
+                  </div>
+                </div>
+                <div id="restorePreviewBox" class="mt-3" style="display:none;">
+                  <div class="alert alert-info" id="restorePreviewText"></div>
+                  <button class="btn btn-gold w-100 mt-2" id="btnExecuteRestore">⚠️ Konfirmasi & Terapkan Data</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== VIEW: PENGATURAN & GITHUB ==================== -->
+        <section class="view-section" id="view-settings">
+          <div class="page-header">
+            <div>
+              <h1 class="page-title">Pengaturan Sistem & Integrasi GitHub</h1>
+              <p class="page-subtitle">Konfigurasi penyimpanan repository GitHub, identitas pemilik kas, dan keamanan.</p>
+            </div>
+          </div>
+
+          <div class="dashboard-grid-2">
+            <!-- GITHUB INTEGRATION CARD -->
+            <div class="content-card">
+              <div class="card-header">
+                <h3 class="card-title">🐙 Koneksi GitHub Repository</h3>
+              </div>
+              <div class="card-body">
+                <div class="alert alert-warning mb-3">
+                  <strong>⚠️ Perhatian Keamanan Penting:</strong>
+                  Token GitHub disimpan secara privat di penyimpanan lokal browser Anda (LocalStorage). Token <strong>TIDAK PERNAH</strong> dikirim ke server pihak ketiga atau dipublikasikan di source code repository.
+                </div>
+
+                <form id="githubSettingsForm">
+                  <div class="form-group mb-3">
+                    <label>Target Repository GitHub (Owner/Repo)</label>
+                    <input type="text" id="ghRepoName" placeholder="contoh: subhansuaib/kas-klien-data" class="form-control">
+                    <small class="text-muted">Disarankan menggunakan repository <strong>PRIVATE</strong> agar data keuangan aman.</small>
+                  </div>
+
+                  <div class="form-group mb-3">
+                    <label>Branch Repository</label>
+                    <input type="text" id="ghBranch" value="main" class="form-control">
+                  </div>
+
+                  <div class="form-group mb-3">
+                    <label>Path Direktori Data</label>
+                    <input type="text" id="ghDataFolder" value="data" class="form-control">
+                    <small class="text-muted">Data akan tersimpan terpisah di /data/clients/klien-xxx/ dsb.</small>
+                  </div>
+
+                  <div class="form-group mb-3">
+                    <label>GitHub Personal Access Token (PAT)</label>
+                    <div class="password-wrapper">
+                      <input type="password" id="ghToken" placeholder="ghp_xxxxxxxxxxxx atau github_pat_xxxx" class="form-control">
+                      <button type="button" class="btn-toggle-token" id="btnToggleToken">👁️</button>
+                    </div>
+                    <small class="text-muted">Gunakan <em>Fine-grained Personal Access Token</em> dengan izin scope 'Contents: Read & Write' ke repository di atas.</small>
+                  </div>
+
+                  <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-outline" id="btnTestGitHub">🔌 Uji Koneksi</button>
+                    <button type="submit" class="btn btn-primary">💾 Simpan Konfigurasi</button>
+                  </div>
+                </form>
+
+                <div class="connection-status-box mt-3" id="ghStatusBox">
+                  <span class="status-dot gray" id="ghStatusDot"></span>
+                  <span id="ghStatusMsg">Belum terhubung ke GitHub.</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- GENERAL SETTINGS CARD -->
+            <div class="content-card">
+              <div class="card-header">
+                <h3 class="card-title">🏢 Identitas Aplikasi & Pemilik</h3>
+              </div>
+              <div class="card-body">
+                <form id="generalSettingsForm">
+                  <div class="form-group mb-3">
+                    <label>Nama Kantor / Firma / Usaha</label>
+                    <input type="text" id="setFirmName" value="MINZATHU & MINZATHU LAW OFFICES" class="form-control">
+                  </div>
+
+                  <div class="form-group mb-3">
+                    <label>Nama Pemilik / Penanggung Jawab</label>
+                    <input type="text" id="setOwnerName" value="Ahmad Subhan Suaib, S.H." class="form-control">
+                  </div>
+
+                  <div class="form-group mb-3">
+                    <label>Mata Uang Default</label>
+                    <input type="text" id="setCurrency" value="IDR (Rp)" class="form-control" readonly>
+                  </div>
+
+                  <div class="form-group mb-3">
+                    <label>Tahun Buku Aktif</label>
+                    <select id="setActiveYear" class="form-control">
+                      <option value="2026" selected>2026</option>
+                      <option value="2025">2025</option>
+                      <option value="2024">2024</option>
+                    </select>
+                  </div>
+
+                  <button type="submit" class="btn btn-primary">Simpan Profil</button>
+                </form>
+
+                <hr class="my-4">
+
+                <!-- RESET DEMO DATA -->
+                <div class="danger-zone-box">
+                  <h4>🧹 Kelola Data Demo</h4>
+                  <p class="text-secondary mb-2">Jika Anda selesai mencoba data contoh bawaan dan ingin mulai mencatat data riil yang bersih:</p>
+                  <button class="btn btn-red btn-sm" id="btnPurgeDemoData">Hapus Semua Data Demo</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- MODAL: TAMBAH / EDIT KLIEN -->
+  <div class="modal-backdrop" id="modalClient" style="display:none;">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 id="modalClientTitle">Tambah Klien Baru</h3>
+        <button class="btn-close-modal" id="btnCloseClientModal">&times;</button>
+      </div>
+      <form id="clientForm">
+        <input type="hidden" id="formClientId">
+        <div class="modal-body">
+          <div class="form-group mb-3">
+            <label>ID Klien (Otomatis)</label>
+            <input type="text" id="formClientCode" class="form-control" readonly>
+          </div>
+
+          <div class="form-group mb-3">
+            <label>Nama Lengkap Klien <span class="text-red">*</span></label>
+            <input type="text" id="formClientName" class="form-control" placeholder="Contoh: Klien A / PT Sinar Harapan / Muh Nasrullah" required>
+          </div>
+
+          <div class="form-group mb-3">
+            <label>Nomor / Referensi Perkara / Klien</label>
+            <input type="text" id="formClientRef" class="form-control" placeholder="Contoh: REF/2026/04/001">
+          </div>
+
+          <div class="row-2-col mb-3">
+            <div class="form-group">
+              <label>Nomor Telepon / WhatsApp</label>
+              <input type="tel" id="formClientPhone" class="form-control" placeholder="08xxxxxxxxxx">
+            </div>
+            <div class="form-group">
+              <label>Email</label>
+              <input type="email" id="formClientEmail" class="form-control" placeholder="klien@email.com">
+            </div>
+          </div>
+
+          <div class="form-group mb-3">
+            <label>Alamat Klien</label>
+            <textarea id="formClientAddress" class="form-control" rows="2" placeholder="Alamat kantor atau domisili klien"></textarea>
+          </div>
+
+          <div class="form-group mb-3">
+            <label>Catatan / Keterangan Tambahan</label>
+            <textarea id="formClientNotes" class="form-control" rows="2" placeholder="Perkara, kontrak kerja, atau catatan penting..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Status Klien</label>
+            <select id="formClientStatus" class="form-control">
+              <option value="Aktif" selected>Aktif</option>
+              <option value="Selesai">Selesai / Nonaktif</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" id="btnCancelClient">Batal</button>
+          <button type="submit" class="btn btn-primary" id="btnSaveClient">Simpan Data Klien</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: TAMBAH / EDIT TRANSAKSI -->
+  <div class="modal-backdrop" id="modalTransaction" style="display:none;">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-header">
+        <h3 id="modalTxTitle">Tambah Transaksi Baru</h3>
+        <button class="btn-close-modal" id="btnCloseTxModal">&times;</button>
+      </div>
+      <form id="txForm">
+        <input type="hidden" id="formTxId">
+        <div class="modal-body">
+          <!-- TYPE SELECTOR TABS -->
+          <div class="tx-type-toggle mb-3">
+            <label class="tx-type-option green-option">
+              <input type="radio" name="txTypeRadio" value="UANG MASUK" id="radioInflow" checked>
+              <span class="tx-type-box">💰 Uang Masuk (Pemasukan)</span>
+            </label>
+            <label class="tx-type-option red-option">
+              <input type="radio" name="txTypeRadio" value="UANG KELUAR" id="radioOutflow">
+              <span class="tx-type-box">💸 Uang Keluar (Pengeluaran)</span>
+            </label>
+          </div>
+
+          <div class="row-2-col mb-3">
+            <div class="form-group">
+              <label>Pilih Klien <span class="text-red">*</span></label>
+              <select id="formTxClientSelect" class="form-control" required>
+                <option value="">-- Pilih Klien --</option>
+                <!-- Populated via JS -->
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Tanggal Transaksi <span class="text-red">*</span></label>
+              <input type="date" id="formTxDate" class="form-control" required>
+            </div>
+          </div>
+
+          <div class="row-2-col mb-3">
+            <div class="form-group">
+              <label>Nominal (Rupiah) <span class="text-red">*</span></label>
+              <div class="currency-input-wrapper">
+                <span class="currency-prefix">Rp</span>
+                <input type="text" id="formTxAmountDisplay" class="form-control font-weight-bold" placeholder="0" required>
+              </div>
+              <input type="hidden" id="formTxAmountRaw" value="0">
+            </div>
+
+            <div class="form-group">
+              <label>Kategori Transaksi <span class="text-red">*</span></label>
+              <div class="d-flex gap-2">
+                <select id="formTxCategory" class="form-control flex-1" required>
+                  <!-- Populated dynamically based on type -->
+                </select>
+                <button type="button" class="btn btn-outline" id="btnAddNewCategory" title="Tambah Kategori Baru">+</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="row-2-col mb-3">
+            <div class="form-group">
+              <label>Metode Pembayaran</label>
+              <select id="formTxMethod" class="form-control">
+                <option value="Transfer Bank" selected>Transfer Bank</option>
+                <option value="Cash">Tunai (Cash)</option>
+                <option value="QRIS">QRIS</option>
+                <option value="E-Wallet">E-Wallet (GoPay/OVO/Dana)</option>
+                <option value="Lainnya">Lainnya</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Nomor Referensi / Resi / Faktur</label>
+              <input type="text" id="formTxRef" class="form-control" placeholder="Contoh: TRF-83921948 / INV-009">
+            </div>
+          </div>
+
+          <div class="row-2-col mb-3">
+            <div class="form-group">
+              <label>Sumber / Pengirim (Dari Siapa)</label>
+              <input type="text" id="formTxSource" class="form-control" placeholder="Contoh: Rekening BCA Klien A / Kas Kantor">
+            </div>
+            <div class="form-group">
+              <label>Tujuan / Penerima (Untuk Siapa)</label>
+              <input type="text" id="formTxDestination" class="form-control" placeholder="Contoh: Rekening Kas Kantor / Toko ATK / Tim Legal">
+            </div>
+          </div>
+
+          <div class="form-group mb-3">
+            <label>Keterangan / Uraian Lengkap Transaksi <span class="text-red">*</span></label>
+            <textarea id="formTxNotes" class="form-control" rows="2" placeholder="Uraikan peruntukan transaksi secara detail..." required></textarea>
+          </div>
+
+          <!-- UPLOAD RESI / BUKTI -->
+          <div class="form-group mb-2">
+            <label>Unggah Bukti / Resi Transaksi (JPG, PNG, WEBP, PDF)</label>
+            <div class="receipt-upload-box">
+              <input type="file" id="formTxReceiptFile" accept="image/jpeg,image/png,image/webp,application/pdf" style="display:none;">
+              <button type="button" class="btn btn-outline btn-sm" id="btnSelectReceipt">📎 Pilih File Bukti</button>
+              <span id="selectedReceiptFileName" class="text-muted text-sm ml-2">Belum ada file dipilih</span>
+              <button type="button" class="btn-link text-red ml-2" id="btnRemoveReceipt" style="display:none;">Hapus Bukti</button>
+            </div>
+            <small class="text-muted d-block mt-1">
+              * Gambar akan dikompres otomatis oleh sistem agar ukuran penyimpanan efisien dan rapi di repository.
+            </small>
+            <!-- PREVIEW THUMBNAIL IF PRESENT -->
+            <div id="receiptPreviewThumbContainer" class="mt-2" style="display:none;">
+              <img id="receiptThumbImg" src="" alt="Thumbnail" class="receipt-thumb">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" id="btnCancelTx">Batal</button>
+          <button type="submit" class="btn btn-primary" id="btnSaveTx">💾 Simpan Transaksi</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: LIGHTBOX PREVIEW BUKTI TRANSAKSI -->
+  <div class="modal-backdrop lightbox-backdrop" id="modalLightbox" style="display:none;">
+    <div class="lightbox-dialog">
+      <div class="lightbox-header">
+        <div class="lightbox-title-box">
+          <h4 id="lbReceiptTitle">Preview Bukti Resi</h4>
+          <span class="badge badge-navy" id="lbTxCode">TRX-000001</span>
+        </div>
+        <div class="lightbox-toolbar">
+          <button class="btn-icon" id="lbZoomOut" title="Perkecil (-)">🔍-</button>
+          <button class="btn-icon" id="lbResetZoom" title="Reset Ukuran">1:1</button>
+          <button class="btn-icon" id="lbZoomIn" title="Perbesar (+)">🔍+</button>
+          <button class="btn-icon" id="lbRotate" title="Putar">🔄</button>
+          <a class="btn-icon" id="lbDownloadLink" download="bukti-transaksi" title="Unduh File">💾</a>
+          <button class="btn-icon btn-close-modal" id="btnCloseLightbox">&times;</button>
+        </div>
+      </div>
+
+      <div class="lightbox-body">
+        <div class="lightbox-viewer" id="lbViewer">
+          <img id="lbImage" src="" alt="Bukti Transaksi" style="transform: scale(1) rotate(0deg);">
+          <div id="lbPdfViewer" style="display:none; width: 100%; height: 100%;">
+            <iframe id="lbPdfFrame" src="" style="width:100%; height:100%; border:none;"></iframe>
+          </div>
+        </div>
+
+        <div class="lightbox-info-sidebar">
+          <h5>Informasi Transaksi Terkait</h5>
+          <div class="lb-info-row">
+            <span class="text-muted">Klien:</span>
+            <strong id="lbClientName">-</strong>
+          </div>
+          <div class="lb-info-row">
+            <span class="text-muted">Tanggal:</span>
+            <strong id="lbTxDate">-</strong>
+          </div>
+          <div class="lb-info-row">
+            <span class="text-muted">Jenis:</span>
+            <span id="lbTxTypeBadge" class="badge badge-green">Uang Masuk</span>
+          </div>
+          <div class="lb-info-row">
+            <span class="text-muted">Nominal:</span>
+            <strong id="lbTxAmount" class="text-green">Rp 0</strong>
+          </div>
+          <div class="lb-info-row">
+            <span class="text-muted">Kategori:</span>
+            <span id="lbTxCategory">-</span>
+          </div>
+          <div class="lb-info-row">
+            <span class="text-muted">Keterangan:</span>
+            <p id="lbTxNotes" class="text-sm mt-1">-</p>
+          </div>
+          <div class="lb-info-row">
+            <span class="text-muted">Nama Berkas:</span>
+            <code id="lbFileName" class="d-block text-xs text-break">-</code>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- APPLICATION SCRIPTS -->
+  <script src="app.js"></script>
+</body>
+</html>
