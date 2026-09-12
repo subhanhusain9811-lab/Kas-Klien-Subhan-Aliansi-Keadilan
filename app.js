@@ -555,6 +555,115 @@ class GitHubService {
     return await res.json();
   }
 
+  async getFileContent(path) {
+    const [owner, repo] = state.settings.github.repo.trim().split('/');
+    const branch = state.settings.github.branch || 'main';
+    const res = await fetch(`${this.apiBase}/repos/${owner}/${repo}/contents/${path}?ref=${branch}`, {
+      headers: this.getHeaders()
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (data.content) {
+      const cleanB64 = data.content.replace(/\s/g, '');
+      const binaryString = atob(cleanB64);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      return new TextDecoder('utf-8').decode(bytes);
+    }
+    return null;
+  }
+
+  // Tarik seluruh data dari repository GitHub (Multi-perangkat: Mac -> iPhone)
+  async pullFromGitHub() {
+    if (!this.isConfigured()) {
+      throw new Error('Konfigurasi GitHub belum lengkap.');
+    }
+    const [owner, repo] = state.settings.github.repo.trim().split('/');
+    const branch = state.settings.github.branch || 'main';
+    const baseFolder = state.settings.github.dataFolder || 'data';
+
+    // 1. Baca settings
+    try {
+      const settingsStr = await this.getFileContent(`${baseFolder}/settings/settings.json`);
+      if (settingsStr) {
+        const parsed = JSON.parse(settingsStr);
+        state.settings.firmName = parsed.firmName || state.settings.firmName;
+        state.settings.ownerName = parsed.ownerName || state.settings.ownerName;
+        state.settings.currency = parsed.currency || state.settings.currency;
+        state.settings.activeYear = parsed.activeYear || state.settings.activeYear;
+      }
+    } catch (e) {
+      console.warn('Gagal membaca settings:', e);
+    }
+
+    // 2. Baca daftar folder clients
+    const res = await fetch(`${this.apiBase}/repos/${owner}/${repo}/contents/${baseFolder}/clients?ref=${branch}`, {
+      headers: this.getHeaders()
+    });
+
+    if (!res.ok) {
+      throw new Error(`Direktori ${baseFolder}/clients belum ditemukan di repository. Pastikan Anda sudah pernah melakukan unggah (push) data dari laptop/Macbook terlebih dahulu.`);
+    }
+
+    const items = await res.json();
+    if (!Array.isArray(items)) {
+      throw new Error('Format respons folder clients tidak valid.');
+    }
+
+    const pulledClients = [];
+    let pulledTransactions = [];
+
+    for (const item of items) {
+      if (item.type === 'dir') {
+        // Ambil client.json
+        try {
+          const clientStr = await this.getFileContent(`${item.path}/client.json`);
+          if (clientStr) {
+            pulledClients.push(JSON.parse(clientStr));
+          }
+        } catch (err) {
+          console.warn(`Gagal membaca ${item.path}/client.json`, err);
+        }
+
+        // Ambil transactions.json
+        try {
+          const txStr = await this.getFileContent(`${item.path}/transactions.json`);
+          if (txStr) {
+            const txs = JSON.parse(txStr);
+            if (Array.isArray(txs)) {
+              pulledTransactions = pulledTransactions.concat(txs);
+            }
+          }
+        } catch (err) {
+          console.warn(`Gagal membaca ${item.path}/transactions.json`, err);
+        }
+      }
+    }
+
+    // 3. Ambil audit_log.json jika ada
+    try {
+      const auditStr = await this.getFileContent(`${baseFolder}/audit_log.json`);
+      if (auditStr) {
+        state.auditLogs = JSON.parse(auditStr);
+      }
+    } catch (e) {}
+
+    if (pulledClients.length > 0 || pulledTransactions.length > 0) {
+      state.clients = pulledClients;
+      const txMap = new Map();
+      pulledTransactions.forEach(t => txMap.set(t.id, t));
+      state.transactions = Array.from(txMap.values());
+      state.saveToStorage();
+    }
+
+    return {
+      clientsCount: pulledClients.length,
+      txCount: state.transactions.length
+    };
+  }
+
   // Push complete clients and transaction structures to GitHub
   async syncAllToGitHub() {
     if (!this.isConfigured()) {
@@ -564,11 +673,24 @@ class GitHubService {
     const baseFolder = state.settings.github.dataFolder || 'data';
     const stats = { clientsPushed: 0, txPushed: 0 };
 
-    // 1. Push settings
+    // 1. Push settings (SANITASI KEAMANAN: HAPUS TOKEN DARI KONTEN GITHUB)
     const settingsPath = `${baseFolder}/settings/settings.json`;
+    const sanitizedSettings = {
+      firmName: state.settings.firmName,
+      ownerName: state.settings.ownerName,
+      currency: state.settings.currency,
+      activeYear: state.settings.activeYear,
+      theme: state.settings.theme,
+      github: {
+        repo: state.settings.github.repo,
+        branch: state.settings.github.branch || 'main',
+        dataFolder: state.settings.github.dataFolder || 'data',
+        token: '' // Token WAJIB kosong saat disimpan ke repository agar tidak memicu GitHub Secret Protection
+      }
+    };
     await this.putFile(
       settingsPath,
-      JSON.stringify(state.settings, null, 2),
+      JSON.stringify(sanitizedSettings, null, 2),
       'Update system and firm settings'
     );
 
@@ -2311,7 +2433,56 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Sync button in sidebar
   document.getElementById('btnQuickSync').addEventListener('click', triggerManualSync);
+  const btnPush = document.getElementById('btnPushToGitHub');
+  if (btnPush) btnPush.addEventListener('click', performPush);
+  const btnPull = document.getElementById('btnPullFromGitHub');
+  if (btnPull) btnPull.addEventListener('click', performPull);
 });
+
+async function performPush() {
+  const dot = document.getElementById('syncDot');
+  const txt = document.getElementById('syncStatusText');
+  if (dot) dot.className = 'status-dot gold';
+  if (txt) txt.textContent = 'Mengunggah...';
+
+  try {
+    showToast('Memulai unggah data ke repository GitHub...', 'info');
+    const stats = await gitHubService.syncAllToGitHub();
+    if (dot) dot.className = 'status-dot green';
+    if (txt) txt.textContent = 'Tersinkron GitHub';
+    state.logAudit('SYNC', 'GITHUB', `Berhasil unggah ${stats.clientsPushed} folder klien dan ${stats.txPushed} transaksi ke GitHub`);
+    showToast(`Unggah sukses! ${stats.clientsPushed} folder klien tersimpan di GitHub.`);
+  } catch (err) {
+    console.error(err);
+    if (dot) dot.className = 'status-dot red';
+    if (txt) txt.textContent = 'Gagal Sinkronisasi';
+    showToast(`Gagal unggah ke GitHub: ${err.message}`, 'error');
+  }
+}
+
+async function performPull() {
+  const dot = document.getElementById('syncDot');
+  const txt = document.getElementById('syncStatusText');
+  if (dot) dot.className = 'status-dot gold';
+  if (txt) txt.textContent = 'Mengambil Data...';
+
+  try {
+    showToast('Mengambil data terbaru dari repository GitHub...', 'info');
+    const res = await gitHubService.pullFromGitHub();
+    if (dot) dot.className = 'status-dot green';
+    if (txt) txt.textContent = 'Data Diperbarui';
+    state.logAudit('SYNC', 'GITHUB', `Berhasil mengunduh ${res.clientsCount} klien dan ${res.txCount} transaksi dari GitHub`);
+    showToast(`Berhasil menarik data: ${res.clientsCount} klien dan ${res.txCount} transaksi.`);
+    renderDashboard();
+    renderClientsView();
+    renderTransactionsView();
+  } catch (err) {
+    console.error(err);
+    if (dot) dot.className = 'status-dot red';
+    if (txt) txt.textContent = 'Gagal Tarik Data';
+    showToast(`Gagal mengambil data dari GitHub: ${err.message}`, 'error');
+  }
+}
 
 async function triggerManualSync() {
   if (!gitHubService.isConfigured()) {
@@ -2320,23 +2491,14 @@ async function triggerManualSync() {
     return;
   }
 
-  const dot = document.getElementById('syncDot');
-  const txt = document.getElementById('syncStatusText');
-  dot.className = 'status-dot gold';
-  txt.textContent = 'Menyinkronkan...';
-
-  try {
-    showToast('Memulai sinkronisasi ke repository GitHub...', 'info');
-    const stats = await gitHubService.syncAllToGitHub();
-    dot.className = 'status-dot green';
-    txt.textContent = 'Tersinkron GitHub';
-    state.logAudit('SYNC', 'GITHUB', `Berhasil sinkronisasi ${stats.clientsPushed} folder klien dan ${stats.txPushed} transaksi ke GitHub`);
-    showToast(`Sinkronisasi sukses! ${stats.clientsPushed} folder klien tersimpan di GitHub.`);
-  } catch (err) {
-    console.error(err);
-    dot.className = 'status-dot red';
-    txt.textContent = 'Gagal Sinkronisasi';
-    showToast(`Gagal sinkronisasi ke GitHub: ${err.message}`, 'error');
+  const isPush = confirm('Pilih Arah Sinkronisasi:\n\n• Klik [OK] untuk MENGUNGGAH (Push) data lokal dari perangkat ini ke GitHub.\n• Klik [Batal] untuk MENARIK (Pull) data dari GitHub ke perangkat ini.');
+  if (isPush) {
+    await performPush();
+  } else {
+    const doPull = confirm('Tarik data dari GitHub dan perbarui data di perangkat ini?');
+    if (doPull) {
+      await performPull();
+    }
   }
 }
 
