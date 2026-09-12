@@ -1,0 +1,34 @@
+[
+  {
+    "id": "LOG-1789222539820",
+    "timestamp": "12/09/2026 22.15.39",
+    "action": "CREATE",
+    "entity": "TRANSACTION",
+    "details": "Catat transaksi baru TRX-000002 (BASRI MARONENG) UANG KELUAR Rp Rp 30.000.000",
+    "syncStatus": "pending"
+  },
+  {
+    "id": "LOG-1789222450874",
+    "timestamp": "12/09/2026 22.14.10",
+    "action": "CREATE",
+    "entity": "TRANSACTION",
+    "details": "Catat transaksi baru TRX-000001 (BASRI MARONENG) UANG MASUK Rp Rp 50.000.000",
+    "syncStatus": "pending"
+  },
+  {
+    "id": "LOG-1789222315071",
+    "timestamp": "12/09/2026 22.11.55",
+    "action": "CREATE",
+    "entity": "CLIENT",
+    "details": "Menambahkan klien baru BASRI MARONENG (KLIEN-0001)",
+    "syncStatus": "pending"
+  },
+  {
+    "id": "LOG-1789222222512",
+    "timestamp": "12/09/2026 22.10.22",
+    "action": "PURGE",
+    "entity": "SYSTEM",
+    "details": "Semua data demo telah dibersihkan oleh pengguna",
+    "syncStatus": "pending"
+  }
+]
