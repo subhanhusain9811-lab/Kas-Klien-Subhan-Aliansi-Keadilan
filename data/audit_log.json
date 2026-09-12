@@ -1,5 +1,21 @@
 [
   {
+    "id": "LOG-1789236595400",
+    "timestamp": "13/09/2026 02.09.55",
+    "action": "UPDATE",
+    "entity": "TRANSACTION",
+    "details": "Perubahan transaksi TRX-000032 (BASRI MARONENG) Rp Rp 8.000",
+    "syncStatus": "pending"
+  },
+  {
+    "id": "LOG-1789236588161",
+    "timestamp": "13/09/2026 02.09.48",
+    "action": "SYNC",
+    "entity": "GITHUB",
+    "details": "Berhasil unggah 1 folder klien dan 32 transaksi ke GitHub",
+    "syncStatus": "pending"
+  },
+  {
     "id": "LOG-1789235662441",
     "timestamp": "13/09/2026 01.54.22",
     "action": "SYNC",
