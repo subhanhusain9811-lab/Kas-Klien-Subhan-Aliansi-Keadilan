@@ -1,5 +1,28 @@
 [
   {
+    "id": "TRX-000032",
+    "clientId": "KLIEN-0001",
+    "clientName": "BASRI MARONENG",
+    "date": "2026-09-12",
+    "month": "09",
+    "year": "2026",
+    "inputDate": "2026-09-12",
+    "inputTime": "01:53:59",
+    "updatedDate": "2026-09-12",
+    "updatedTime": "01:53:59",
+    "type": "UANG KELUAR",
+    "category": "Lainnya",
+    "amount": 8000,
+    "paymentMethod": "Cash",
+    "source": "",
+    "destination": "",
+    "refNumber": "",
+    "notes": "parkir dan lain lain",
+    "status": "Selesai",
+    "receipt": null,
+    "syncStatus": "pending"
+  },
+  {
     "id": "TRX-000001",
     "clientId": "KLIEN-0001",
     "clientName": "BASRI MARONENG",
