@@ -1,5 +1,21 @@
 [
   {
+    "id": "LOG-1789747738013",
+    "timestamp": "19/09/2026 00.08.57",
+    "action": "UPDATE",
+    "entity": "TRANSACTION",
+    "details": "Perubahan transaksi TRX-000037 (SRI JUMAINI NOTARIS) Rp Rp 600.000",
+    "syncStatus": "pending"
+  },
+  {
+    "id": "LOG-1789747541271",
+    "timestamp": "19/09/2026 00.05.41",
+    "action": "SYNC",
+    "entity": "GITHUB",
+    "details": "Berhasil mengunduh 2 klien dan 37 transaksi dari GitHub",
+    "syncStatus": "pending"
+  },
+  {
     "id": "LOG-1789747451377",
     "timestamp": "19/09/2026 00.04.11",
     "action": "CREATE",
