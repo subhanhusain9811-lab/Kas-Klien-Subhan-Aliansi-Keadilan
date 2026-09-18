@@ -1,5 +1,61 @@
 [
   {
+    "id": "LOG-1789745017065",
+    "timestamp": "18/09/2026 23.23.37",
+    "action": "CREATE",
+    "entity": "TRANSACTION",
+    "details": "Catat transaksi baru TRX-000036 (Sri Jumaini Notaris) UANG KELUAR Rp Rp 1.000.000",
+    "syncStatus": "pending"
+  },
+  {
+    "id": "LOG-1789744967918",
+    "timestamp": "18/09/2026 23.22.47",
+    "action": "UPDATE",
+    "entity": "TRANSACTION",
+    "details": "Perubahan transaksi TRX-000034 (Sri Jumaini Notaris) Rp Rp 700.000",
+    "syncStatus": "pending"
+  },
+  {
+    "id": "LOG-1789744947171",
+    "timestamp": "18/09/2026 23.22.27",
+    "action": "CREATE",
+    "entity": "TRANSACTION",
+    "details": "Catat transaksi baru TRX-000035 (Sri Jumaini Notaris) UANG KELUAR Rp Rp 700.000",
+    "syncStatus": "pending"
+  },
+  {
+    "id": "LOG-1789744865577",
+    "timestamp": "18/09/2026 23.21.05",
+    "action": "CREATE",
+    "entity": "TRANSACTION",
+    "details": "Catat transaksi baru TRX-000034 (Sri Jumaini Notaris) UANG KELUAR Rp Rp 700.000",
+    "syncStatus": "pending"
+  },
+  {
+    "id": "LOG-1789744811337",
+    "timestamp": "18/09/2026 23.20.11",
+    "action": "CREATE",
+    "entity": "TRANSACTION",
+    "details": "Catat transaksi baru TRX-000033 (Sri Jumaini Notaris) UANG MASUK Rp Rp 3.000.000",
+    "syncStatus": "pending"
+  },
+  {
+    "id": "LOG-1789744759981",
+    "timestamp": "18/09/2026 23.19.19",
+    "action": "CREATE",
+    "entity": "CLIENT",
+    "details": "Menambahkan klien baru Sri Jumaini Notaris (KLIEN-0002)",
+    "syncStatus": "pending"
+  },
+  {
+    "id": "LOG-1789296136025",
+    "timestamp": "13/09/2026 18.42.16",
+    "action": "SYNC",
+    "entity": "GITHUB",
+    "details": "Berhasil mengunduh 1 klien dan 32 transaksi dari GitHub",
+    "syncStatus": "pending"
+  },
+  {
     "id": "LOG-1789236595400",
     "timestamp": "13/09/2026 02.09.55",
     "action": "UPDATE",
