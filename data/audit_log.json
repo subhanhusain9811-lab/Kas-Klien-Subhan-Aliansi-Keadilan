@@ -1,5 +1,21 @@
 [
   {
+    "id": "LOG-1791783033807",
+    "timestamp": "12/10/2026 13.30.33",
+    "action": "DELETE",
+    "entity": "TRANSACTION",
+    "details": "Menghapus transaksi TRX-000050 (BLBI Depan 45 Sukhemi)",
+    "syncStatus": "pending"
+  },
+  {
+    "id": "LOG-1791782916769",
+    "timestamp": "12/10/2026 13.28.36",
+    "action": "SYNC",
+    "entity": "GITHUB",
+    "details": "Berhasil unggah 3 folder klien dan 50 transaksi ke GitHub",
+    "syncStatus": "pending"
+  },
+  {
     "id": "LOG-1791782884610",
     "timestamp": "12/10/2026 13.28.04",
     "action": "CREATE",
