@@ -1,5 +1,21 @@
 [
   {
+    "id": "LOG-1791782884610",
+    "timestamp": "12/10/2026 13.28.04",
+    "action": "CREATE",
+    "entity": "TRANSACTION",
+    "details": "Catat transaksi baru TRX-000050 (BLBI Depan 45 Sukhemi) UANG KELUAR Rp Rp 123.000",
+    "syncStatus": "pending"
+  },
+  {
+    "id": "LOG-1791782448922",
+    "timestamp": "12/10/2026 13.20.48",
+    "action": "SYNC",
+    "entity": "GITHUB",
+    "details": "Berhasil unggah 3 folder klien dan 49 transaksi ke GitHub",
+    "syncStatus": "pending"
+  },
+  {
     "id": "LOG-1791782386465",
     "timestamp": "12/10/2026 13.19.46",
     "action": "CREATE",
