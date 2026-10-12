@@ -1,5 +1,28 @@
 [
   {
+    "id": "TRX-000047",
+    "clientId": "KLIEN-0003",
+    "clientName": "BLBI Depan 45 Sukhemi",
+    "date": "2026-10-12",
+    "month": "10",
+    "year": "2026",
+    "inputDate": "2026-10-12",
+    "inputTime": "13:13:34",
+    "updatedDate": "2026-10-12",
+    "updatedTime": "13:13:34",
+    "type": "UANG KELUAR",
+    "category": "Transportasi & Akomodasi",
+    "amount": 450000,
+    "paymentMethod": "Transfer Bank",
+    "source": "",
+    "destination": "",
+    "refNumber": "",
+    "notes": "Solar pajero plus rokok",
+    "status": "Selesai",
+    "receipt": null,
+    "syncStatus": "pending"
+  },
+  {
     "id": "TRX-000046",
     "clientId": "KLIEN-0003",
     "clientName": "BLBI Depan 45 Sukhemi",
