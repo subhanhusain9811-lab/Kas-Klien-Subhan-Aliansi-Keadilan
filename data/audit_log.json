@@ -1,10 +1,10 @@
 [
   {
-    "id": "LOG-1791902992699",
-    "timestamp": "13/10/2026 22.49.52",
+    "id": "LOG-1792025012536",
+    "timestamp": "15/10/2026 08.43.32",
     "action": "CREATE",
     "entity": "TRANSACTION",
-    "details": "Catat transaksi baru TRX-000050 (BLBI Depan 45 Sukhemi) UANG KELUAR Rp Rp 502.500",
+    "details": "Catat transaksi baru TRX-000050 (BLBI Depan 45 Sukhemi) UANG KELUAR Rp Rp 92.000",
     "syncStatus": "pending"
   },
   {
