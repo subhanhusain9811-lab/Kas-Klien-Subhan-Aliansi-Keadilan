@@ -1,5 +1,29 @@
 [
   {
+    "id": "LOG-1792868996634",
+    "timestamp": "25/10/2026 03.09.56",
+    "action": "RESTORE",
+    "entity": "BACKUP",
+    "details": "Memulihkan 3 klien dan 59 transaksi dari file cadangan",
+    "syncStatus": "pending"
+  },
+  {
+    "id": "LOG-1792900000001",
+    "timestamp": "25/10/2026 03.00.00",
+    "action": "RESTORE",
+    "entity": "CLIENT_TRANSACTIONS",
+    "details": "Injeksi 22 transaksi KLIEN-0003 (BLBI Depan 45 Sukhemi): Total Masuk Rp 9.500.000, Total Keluar Rp 8.777.390, Sisa Saldo Rp 722.610 (Data KLIEN-0001 & KLIEN-0002 utuh 100%)",
+    "syncStatus": "pending"
+  },
+  {
+    "id": "LOG-1792124831942",
+    "timestamp": "16/10/2026 12.27.11",
+    "action": "SYNC",
+    "entity": "GITHUB",
+    "details": "Berhasil mengunduh 3 klien dan 37 transaksi dari GitHub",
+    "syncStatus": "pending"
+  },
+  {
     "id": "LOG-1792082023413",
     "timestamp": "16/10/2026 00.33.43",
     "action": "CREATE",
