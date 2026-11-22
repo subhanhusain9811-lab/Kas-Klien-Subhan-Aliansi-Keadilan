@@ -1,5 +1,21 @@
 [
   {
+    "id": "LOG-1795364474870",
+    "timestamp": "23/11/2026 00.21.14",
+    "action": "RESTORE",
+    "entity": "BACKUP",
+    "details": "Memulihkan 3 klien dan 64 transaksi dari file cadangan",
+    "syncStatus": "pending"
+  },
+  {
+    "id": "LOG-1793159042173",
+    "timestamp": "28/10/2026 11.44.02",
+    "action": "SYNC",
+    "entity": "GITHUB",
+    "details": "Berhasil unggah 3 folder klien dan 64 transaksi ke GitHub",
+    "syncStatus": "pending"
+  },
+  {
     "id": "LOG-1793158909119",
     "timestamp": "28/10/2026 11.41.49",
     "action": "CREATE",
